@@ -59,6 +59,7 @@ int lireProbleme(const char* nomFichier, glp_prob* prob) {
 	FILE* fichier = NULL;
 	char chTemp[20], signe[3];
 	int i, j, num = 0;
+	double numD = 0;
 
 	if ((fichier = fopen(nomFichier, "r"))) {
 		fscanf(fichier, "%s", chTemp);
@@ -73,13 +74,21 @@ int lireProbleme(const char* nomFichier, glp_prob* prob) {
 		else
 			glp_set_obj_dir(prob, GLP_MIN);
 		prob->fonc = (double*) malloc(sizeof(double) * prob->nVar);
+		/*
+		 * Fonction maximiser/minimiser
+		 */
 		for (j = 0; j < prob->nVar; j++) {
 			fscanf(fichier, "%s", signe);
-			fscanf(fichier, "%lf", &prob->fonc[j]);
+			fscanf(fichier, "%lf", &numD);
 			if (!strcmp(signe, "-"))
 				prob->fonc[j] = -prob->fonc[j];
+			else
+
 			fscanf(fichier, "%s", chTemp);
 		}
+		/*
+		 * Contraintes
+		 */
 		prob->cont = (double**) malloc(sizeof(double*) * prob->nCont);
 		prob->signeCont = (int*) malloc(sizeof(int) * prob->nCont);
 		prob->valCont = (double*) malloc(sizeof(double) * prob->nCont);
