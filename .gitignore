@@ -2,3 +2,5 @@ CMakeLists.txt
 cmake*
 *.bak
 .idea
+*.o
+prog
