@@ -27,3 +27,7 @@ mrproper:	clean
 	rm -f $(EXE)
 
 # DO NOT DELETE THIS LINE
+
+probleme.o: probleme.h types.h pivot.h
+utils.o: utils.h
+pivot.o: pivot.h types.h utils.h

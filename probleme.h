@@ -1,7 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <glpk.h>
 
-int lireProbleme(const char*, glp_prob*);
+#include "types.h"
+#include "pivot.h"
 
-void afficherProbleme(glp_prob*);
 
-void libererMemoireProbleme(glp_prob*);
+int lireProbleme(const char *, prob_t *);
+
+void afficherProbleme(prob_t);
+
+void libererMemoireProbleme(prob_t);
+
+int *heuristique(prob_t *);

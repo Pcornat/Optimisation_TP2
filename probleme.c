@@ -5,8 +5,8 @@
 
 #include "probleme.h"
 
-void afficherProbleme(glp_prob* prob) {
-	int i, j;
+void afficherProbleme(prob_t prob) {
+    unsigned int i, j;
 
 	printf("\n");
 	if (prob.typeOpt)
@@ -52,43 +52,32 @@ void afficherProbleme(glp_prob* prob) {
 	printf("\n");
 }
 
-int lireProbleme(const char* nomFichier, glp_prob* prob) {
-/*Lit les donnees d'un probleme a partir d'un fichier specifie*/
-/*et les place dans la structure prob*/
+int lireProbleme(const char *nomFichier, prob_t *prob) {
+    /*Lit les donnees d'un probleme a partir d'un fichier specifie*/
+    /*et les place dans la structure prob*/
 
-	FILE* fichier = NULL;
+    FILE *fichier;
 	char chTemp[20], signe[3];
-	int i, j, num = 0;
-	double numD = 0;
+    unsigned int i, j;
 
 	if ((fichier = fopen(nomFichier, "r"))) {
 		fscanf(fichier, "%s", chTemp);
-		fscanf(fichier, "%d", &num);
-		glp_add_cols(prob, num);
+        fscanf(fichier, "%ud", &prob->nVar);
 		fscanf(fichier, "%s", chTemp);
-		fscanf(fichier, "%d", &num);
-		glp_add_rows(prob, num);
+        fscanf(fichier, "%ud", &prob->nCont);
 		fscanf(fichier, "%s", chTemp);
 		if (!strcmp(chTemp, "max"))
-			glp_set_obj_dir(prob, GLP_MAX);
+            prob->typeOpt = 1;
 		else
-			glp_set_obj_dir(prob, GLP_MIN);
+            prob->typeOpt = 0;
 		prob->fonc = (double*) malloc(sizeof(double) * prob->nVar);
-		/*
-		 * Fonction maximiser/minimiser
-		 */
 		for (j = 0; j < prob->nVar; j++) {
 			fscanf(fichier, "%s", signe);
-			fscanf(fichier, "%lf", &numD);
+            fscanf(fichier, "%lf", &prob->fonc[j]);
 			if (!strcmp(signe, "-"))
 				prob->fonc[j] = -prob->fonc[j];
-			else
-
 			fscanf(fichier, "%s", chTemp);
 		}
-		/*
-		 * Contraintes
-		 */
 		prob->cont = (double**) malloc(sizeof(double*) * prob->nCont);
 		prob->signeCont = (int*) malloc(sizeof(int) * prob->nCont);
 		prob->valCont = (double*) malloc(sizeof(double) * prob->nCont);
@@ -110,13 +99,14 @@ int lireProbleme(const char* nomFichier, glp_prob* prob) {
 		}
 		fclose(fichier);
 	} else {
-		perror("Erreur. Code ");
-		return EXIT_FAILURE;
-	}
-	return EXIT_SUCCESS;
+        printf("Probleme lecture fichier\n");
+        return -1;
+    }
+
+    return 0;
 }
 
-void libererMemoireProbleme(glp_prob* prob) {
+void libererMemoireProbleme(prob_t prob) {
 	int i;
 
 	if (prob.fonc != NULL)
@@ -130,4 +120,32 @@ void libererMemoireProbleme(glp_prob* prob) {
 		free(prob.signeCont);
 	if (prob.valCont != NULL)
 		free(prob.valCont);
+}
+
+int *heuristique(prob_t *prob) {
+    int *heuris = (int *) malloc(sizeof(int) * (prob->nVar + 1));
+    double **pivot = initMatPivot(prob);
+
+    memset(heuris, 0, prob->nVar + 1);
+
+    int colPivot = selectionnerColPivot(prob, pivot);
+    int lignePivot;
+
+    while (colPivot != -1) {
+        lignePivot = selectionnerLignePivot(prob, pivot);
+        heuris[colPivot + 1] = pivot[lignePivot][prob->nVar + prob->nCont + 1] / pivot[lignePivot][colPivot];
+
+        for (int i = 0; i < prob->nCont; ++i) {
+            pivot[i][prob->nVar + prob->nCont + 1] -= heuris[colPivot + 1] * pivot[i][colPivot];
+        }
+
+        pivot[prob->nCont][colPivot] = 0;
+
+        colPivot = selectionnerColPivot(prob, pivot);
+    }
+
+    heuris[0] = -pivot[prob->nCont][prob->nVar + prob->nCont + 1];
+
+    return heuris
+
 }
