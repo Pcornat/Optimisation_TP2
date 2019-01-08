@@ -30,4 +30,5 @@ mrproper:	clean
 
 probleme.o: probleme.h types.h pivot.h
 utils.o: utils.h
+main.o: probleme.h types.h pivot.h
 pivot.o: pivot.h types.h utils.h

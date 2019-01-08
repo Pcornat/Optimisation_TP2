@@ -51,7 +51,7 @@ void afficherMatrice(prob_t *prob, double **matrice) {
  * @return L'indice de la colonne avec le coefficient le plus grand.
  */
 int selectionnerColPivot(prob_t *prob, double **matrice) {
-    unsigned int nbColonne = ²²;
+	unsigned int nbColonne = prob->nVar + prob->nCont + 1;
     int j = -1;
     double max = 0;
     for (unsigned int i = 0; i < nbColonne; ++i) {
@@ -60,6 +60,7 @@ int selectionnerColPivot(prob_t *prob, double **matrice) {
             j = i;
         }
     }
+
     return j;
 }
 
@@ -71,8 +72,8 @@ int selectionnerColPivot(prob_t *prob, double **matrice) {
  * @return
  */
 int selectionnerLignePivot(prob_t *prob, double **matrice, int nColPivot) {
-    int nLignePivot = -1, colonneMax = prob->nVar + prob->nCont;
-    double rapport = 0, min = DBL_MAX;
+	unsigned int nLignePivot = 0, colonneMax = prob->nVar + prob->nCont;
+	double rapport = 0, min = DBL_MAX;
     for (unsigned int i = 0; i < prob->nCont; ++i) {
         rapport = matrice[i][colonneMax] / matrice[i][nColPivot];
         if (min > rapport) {

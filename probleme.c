@@ -5,6 +5,7 @@
 
 #include "probleme.h"
 
+
 void afficherProbleme(prob_t prob) {
     unsigned int i, j;
 
@@ -52,7 +53,7 @@ void afficherProbleme(prob_t prob) {
 	printf("\n");
 }
 
-int lireProbleme(const char *nomFichier, prob_t *prob) {
+int lireProbleme(char *nomFichier, prob_t *prob) {
     /*Lit les donnees d'un probleme a partir d'un fichier specifie*/
     /*et les place dans la structure prob*/
 
@@ -122,21 +123,19 @@ void libererMemoireProbleme(prob_t prob) {
 		free(prob.valCont);
 }
 
-int *heuristique(prob_t *prob) {
-    int *heuris = (int *) malloc(sizeof(int) * (prob->nVar + 1));
+int *heuristique(prob_t *prob, int *heuris) {
     double **pivot = initMatPivot(prob);
-
-    memset(heuris, 0, prob->nVar + 1);
+	afficherMatrice(prob, pivot);
 
     int colPivot = selectionnerColPivot(prob, pivot);
     int lignePivot;
 
     while (colPivot != -1) {
-        lignePivot = selectionnerLignePivot(prob, pivot);
-        heuris[colPivot + 1] = pivot[lignePivot][prob->nVar + prob->nCont + 1] / pivot[lignePivot][colPivot];
+		lignePivot = selectionnerLignePivot(prob, pivot, colPivot);
+		heuris[colPivot + 1] = (int) (pivot[lignePivot][prob->nVar + prob->nCont] / pivot[lignePivot][colPivot]);
 
-        for (int i = 0; i < prob->nCont; ++i) {
-            pivot[i][prob->nVar + prob->nCont + 1] -= heuris[colPivot + 1] * pivot[i][colPivot];
+		for (unsigned int i = 0; i < prob->nCont; ++i) {
+			pivot[i][prob->nVar + prob->nCont] -= heuris[colPivot + 1] * pivot[i][colPivot];
         }
 
         pivot[prob->nCont][colPivot] = 0;
@@ -144,8 +143,14 @@ int *heuristique(prob_t *prob) {
         colPivot = selectionnerColPivot(prob, pivot);
     }
 
-    heuris[0] = -pivot[prob->nCont][prob->nVar + prob->nCont + 1];
+	afficherMatrice(prob, pivot);
+	heuris[0] = -pivot[prob->nCont][prob->nVar + prob->nCont];
 
-    return heuris
+	return heuris;
 
+}
+
+void affichage(int *heuris) {
+	printf("Z = %d\n", heuris[0]);
+	printf("X1 = %d, X2 = %d, X3 = %d \n", heuris[1], heuris[2], heuris[3]);
 }
